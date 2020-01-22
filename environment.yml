@@ -1,0 +1,19 @@
+name: tam-dask
+channels:
+  - http://www.idiap.ch/software/beat/conda
+  - https://www.idiap.ch/software/bob/conda
+  - defaults
+  - http://www.idiap.ch/software/bob/conda
+dependencies:
+  - dask
+  - dask-jobqueue
+  - bob.bio.spear
+  - gridtk
+  - bob.bio.face
+  - bob.bio.video
+  - scikit-learn
+  - scipy
+  - jupyterlab
+  - python-graphviz
+  - graphviz
+  - pandas
