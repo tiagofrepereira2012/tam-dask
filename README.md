@@ -9,10 +9,9 @@ It has 4 notebooks.
   - `Dask-bag-speaker.ipynb`: Same example as before, but now we build the pipeline using dask.bag.
 
 
-To install/run these examples do (assuming that you already have a (miniconda)[https://docs.conda.io/en/latest/miniconda.html] in your workstation) :
+To install/run these examples do (assuming that you already have a [miniconda](https://docs.conda.io/en/latest/miniconda.html) in your workstation) :
 
 
-console
 ```
  conda env create -f environment.yml
  conda activate tam-dask
