@@ -11,9 +11,13 @@ dependencies:
   - gridtk
   - bob.bio.face
   - bob.bio.video
-  - scikit-learn
+  - bob.learn.em
+  - bob.bio.gmm
   - scipy
   - jupyterlab
   - python-graphviz
   - graphviz
   - pandas
+  - numpy <= 1.18
+  - scipy <= 1.1.0
+  - scikit-learn <= 0.21.3  
