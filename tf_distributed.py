@@ -26,7 +26,7 @@ from dask.distributed import Client, LocalCluster
 from dask_tensorflow import start_tensorflow
 
 #### HERE WE NEED TO WAIT TO GET THE JOBS BEFORE GETTING THE SPEC
-client = scale_to_sget(3)
+client = scale_to_sge(3)
 import ipdb; ipdb.set_trace()
 
 ###### ONCE YOU GOT THE JOBS, CONTINUE
