@@ -26,13 +26,13 @@ import ipdb; ipdb.set_trace()
 
 
 #### HERE WE NEED TO WAIT TO GET THE JOBS BEFORE GETTING THE SPEC
-client = scale_to_sge(3)
+client = scale_to_sge(2)
 
 
 ###### ONCE YOU GOT THE JOBS, CONTINUE
 
 
-tf_spec, dask_spec = start_tensorflow(client, ps=1, worker=3)
+tf_spec, dask_spec = start_tensorflow(client, ps=1, worker=1)
 #os.environ['TF_CONF'] = json.dumps(tf_spec)
 os.environ['TF_CONF'] = json.dumps(tf_spec.as_dict())
 
