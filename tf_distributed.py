@@ -26,13 +26,13 @@ from dask.distributed import Client, LocalCluster
 from dask_tensorflow import start_tensorflow
 
 #### HERE WE NEED TO WAIT TO GET THE JOBS BEFORE GETTING THE SPEC
-client = scale_to_sge(3)
+client = scale_to_sge(2)
 import ipdb; ipdb.set_trace()
 
 ###### ONCE YOU GOT THE JOBS, CONTINUE
 
 
-tf_spec, dask_spec = start_tensorflow(client, ps=1, worker=2)
+tf_spec, dask_spec = start_tensorflow(client, ps=1, worker=1)
 #os.environ['TF_CONF'] = json.dumps(tf_spec)
 os.environ['TF_CONF'] = json.dumps(tf_spec.as_dict())
 
@@ -85,7 +85,10 @@ class DummyModel(tf.keras.Model):
 #### WRAPPING UP MY CODE INTO THE DISTRIBUTED STRATEGY
 
 #mirrored_strategy = tf.distribute.experimental.MultiWorkerMirroredStrategy()
-mirrored_strategy = tf.distribute.MirroredStrategy()
+import ipdb; ipdb.set_trace()
+gpus = tf.config.experimental.list_physical_devices('GPU')
+devices = ["/gpu:0"]
+mirrored_strategy = tf.distribute.MirroredStrategy(devices)
 with mirrored_strategy.scope():
     model = DummyModel()
     dataset = create_mnist_dataset()
@@ -132,7 +135,7 @@ def train_one_epoch(dataset):
                                                   args=(inputs[0], inputs[1] ) )
 
         # Reducing over the workers
-        loss = mirrored_strategy.reduce(tf.distribute.ReduceOp.MEAN, l, axis=0)
+        loss = mirrored_strategy.reduce(tf.distribute.ReduceOp.MEAN, l, axis=None)
         tf.print("Training Loss", loss)
         #tf.print("Training Loss", l)
 
