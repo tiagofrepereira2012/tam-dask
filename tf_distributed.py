@@ -3,7 +3,7 @@ import os
 import json
 from dask_tensorflow import start_tensorflow
 
-
+from dask.distributed import Client, LocalCluster
 def scale_to_sge(n_workers):
     queue="q_gpu"
     queue_resource_spec="q_gpu=TRUE"
@@ -19,7 +19,7 @@ def scale_to_sge(n_workers):
 
 import ipdb; ipdb.set_trace()
 ## Dask using to boostrap the workers
-#from dask.distributed import Client, LocalCluster
+
 #cluster = LocalCluster(nanny=False, processes=False, n_workers=1, threads_per_worker=1, host="localhost", protocol="tcp://")
 #cluster.scale_up(4)
 #client = Client(cluster)
