@@ -20,7 +20,7 @@ def scale_to_sge(n_workers):
 ## Dask using to boostrap the workers
 
 #cluster = LocalCluster(nanny=False, processes=False, n_workers=1, threads_per_worker=1, host="localhost", protocol="tcp://")
-#cluster.scale_up(4)
+#cluster.scale_up(2)
 #client = Client(cluster)
 
 
@@ -84,8 +84,8 @@ class DummyModel(tf.keras.Model):
 
 #### WRAPPING UP MY CODE INTO THE DISTRIBUTED STRATEGY
 
-#mirrored_strategy = tf.distribute.experimental.MultiWorkerMirroredStrategy()
-mirrored_strategy = tf.distribute.MirroredStrategy()
+mirrored_strategy = tf.distribute.experimental.MultiWorkerMirroredStrategy()
+#mirrored_strategy = tf.distribute.MirroredStrategy()
 with mirrored_strategy.scope():
     model = DummyModel()
     dataset = create_mnist_dataset()
@@ -143,10 +143,13 @@ with mirrored_strategy.scope():
 
 
     #### NOW LET'S DO THE OUTER LOOP
-    epochs = 1
+    epochs = 2
     for epoch in range(epochs):
+        tf.print("NEW EPOCH")
         total_loss = train_one_epoch(dataset)
-
+        tf.print("########################")
+        tf.print("EPOCH Loss", total_loss)
+        tf.print("########################")
 
     pass
 
