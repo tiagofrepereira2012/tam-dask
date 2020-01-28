@@ -1,7 +1,7 @@
 import tensorflow as tf
 import os
 import json
-
+from dask_tensorflow import start_tensorflow
 
 
 def scale_to_sge(n_workers):
@@ -17,22 +17,22 @@ def scale_to_sge(n_workers):
     cluster.scale_up(n_workers)
     return Client(cluster)
 
-
-# Dask using to boostrap the workers
-from dask.distributed import Client, LocalCluster
-#cluster = LocalCluster(nanny=False, processes=False, n_workers=1, threads_per_worker=1)
-#cluster.scale_up(3)
+import ipdb; ipdb.set_trace()
+## Dask using to boostrap the workers
+#from dask.distributed import Client, LocalCluster
+#cluster = LocalCluster(nanny=False, processes=False, n_workers=1, threads_per_worker=1, host="localhost", protocol="tcp://")
+#cluster.scale_up(4)
 #client = Client(cluster)
-from dask_tensorflow import start_tensorflow
+
 
 #### HERE WE NEED TO WAIT TO GET THE JOBS BEFORE GETTING THE SPEC
-client = scale_to_sge(2)
-import ipdb; ipdb.set_trace()
+client = scale_to_sge(3)
+
 
 ###### ONCE YOU GOT THE JOBS, CONTINUE
 
 
-tf_spec, dask_spec = start_tensorflow(client, ps=1, worker=1)
+tf_spec, dask_spec = start_tensorflow(client, ps=1, worker=3)
 #os.environ['TF_CONF'] = json.dumps(tf_spec)
 os.environ['TF_CONF'] = json.dumps(tf_spec.as_dict())
 
@@ -85,10 +85,7 @@ class DummyModel(tf.keras.Model):
 #### WRAPPING UP MY CODE INTO THE DISTRIBUTED STRATEGY
 
 #mirrored_strategy = tf.distribute.experimental.MultiWorkerMirroredStrategy()
-import ipdb; ipdb.set_trace()
-gpus = tf.config.experimental.list_physical_devices('GPU')
-devices = ["/gpu:0"]
-mirrored_strategy = tf.distribute.MirroredStrategy(devices)
+mirrored_strategy = tf.distribute.MirroredStrategy()
 with mirrored_strategy.scope():
     model = DummyModel()
     dataset = create_mnist_dataset()
@@ -101,49 +98,56 @@ with mirrored_strategy.scope():
     optimizer = tf.keras.optimizers.Adam(learning_rate=0.1)
 
 
-def train_replica_step(inputs, label):
-    """
-    This step will run in every worker
-    """
+with mirrored_strategy.scope():
 
-    with tf.GradientTape() as tape:
+    def train_replica_step(inputs, label):
+        """
+        This step will run in every worker
+        """
 
-        #X = inputs["image"]
-        #labels = inputs["label"]
+        with tf.GradientTape() as tape:
 
-        # MODEL ALREADY INSTANTIATED BEFORE
-        logits = model(inputs, training=True)
+            #X = inputs["image"]
+            #labels = inputs["label"]
+            # MODEL ALREADY INSTANTIATED BEFORE
+            logits = model(inputs, training=True)
 
-        # Averaging inside a worker
-        loss = tf.nn.compute_average_loss(
+            # Averaging inside a worker
+            loss = tf.nn.compute_average_loss(
                 loss_fn(label, logits))
 
-    # Accumulating the gradients
-    grads = tape.gradient(loss, model.variables)
-    optimizer.apply_gradients(zip(grads, model.variables))
+        # Accumulating the gradients
+        grads = tape.gradient(loss, model.variables)
+        optimizer.apply_gradients(zip(grads, model.variables))
+
+        tf.print("Replica Loss", loss)
+
+        return loss
 
 
-    return loss
+    @tf.function
+    def train_one_epoch(dataset):
+        n_batches = 0
+        loss = 0.0
+        for inputs in dataset:
 
-
-@tf.function
-def train_one_epoch(dataset):
-
-    for inputs in dataset:
-
-        l = mirrored_strategy.experimental_run_v2(train_replica_step, 
+            l = mirrored_strategy.experimental_run_v2(train_replica_step, 
                                                   args=(inputs[0], inputs[1] ) )
 
-        # Reducing over the workers
-        loss = mirrored_strategy.reduce(tf.distribute.ReduceOp.MEAN, l, axis=None)
-        tf.print("Training Loss", loss)
-        #tf.print("Training Loss", l)
+            # Reducing over the workers
+            loss += mirrored_strategy.reduce(tf.distribute.ReduceOp.MEAN, l, axis=None)
+            n_batches += 1
+             
+            #tf.print("Training Loss", l)
+        return loss/float(n_batches)
 
 
-#### NOW LET'S DO THE OUTER LOOP
-epochs = 1
-for epoch in range(epochs):
-    train_one_epoch(dataset)
-pass
+    #### NOW LET'S DO THE OUTER LOOP
+    epochs = 1
+    for epoch in range(epochs):
+        total_loss = train_one_epoch(dataset)
+
+
+    pass
 
 
