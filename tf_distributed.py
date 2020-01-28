@@ -17,7 +17,6 @@ def scale_to_sge(n_workers):
     cluster.scale_up(n_workers)
     return Client(cluster)
 
-import ipdb; ipdb.set_trace()
 ## Dask using to boostrap the workers
 
 #cluster = LocalCluster(nanny=False, processes=False, n_workers=1, threads_per_worker=1, host="localhost", protocol="tcp://")
@@ -26,6 +25,7 @@ import ipdb; ipdb.set_trace()
 
 
 #### HERE WE NEED TO WAIT TO GET THE JOBS BEFORE GETTING THE SPEC
+import ipdb; ipdb.set_trace()
 client = scale_to_sge(2)
 
 
