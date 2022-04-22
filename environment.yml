@@ -1,23 +1,19 @@
 name: tam-dask
 channels:
-  - http://www.idiap.ch/software/beat/conda
-  - https://www.idiap.ch/software/bob/conda
-  - defaults
-  - http://www.idiap.ch/software/bob/conda
+  - https://www.idiap.ch/software/bob/conda/label/beta/
+  - conda-forge
 dependencies:
+  - python==3.9
   - dask
   - dask-jobqueue
-  - bob.bio.spear
   - gridtk
+  - bob.pipelines
   - bob.bio.face
-  - bob.bio.video
-  - bob.learn.em
-  - bob.bio.gmm
   - scipy
   - jupyterlab
   - python-graphviz
   - graphviz
   - pandas
-  - numpy <= 1.18
-  - scipy <= 1.1.0
-  - scikit-learn <= 0.21.3  
+  - numpy 
+  - scipy 
+  - scikit-learn
