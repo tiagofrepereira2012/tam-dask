@@ -1,7 +1,7 @@
 # Building pipelines with Dask
 
 This repository contains the `jupiter-lab` material from my TAM talk entitled **Building pipelines with Dask**.
-It has 4 notebooks.
+It has 3 notebooks.
 
   - `Dask-array.ipynb`: Explains what dask array is and how to deploy large matrices computations in our SGE grid
   - `Dask-delayed.ipynb`: Explains the basic concept of computation graphs and how to parallelize pipelines using dask.delayed
